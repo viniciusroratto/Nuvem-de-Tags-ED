@@ -1,0 +1,235 @@
+// Bibliotecas usadas.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h> // Esta biblioteca é usada para calcular o tempo de execução dos programas.
+#include "bib_lista.h" // Biblioteca criada para as funções implementadas no trabalho.
+
+// Função que lê linhas do arquivo e armazena na LDE.
+// Entrada: - Ponteiro pra arquivo (arquivotxt).
+//          - Ponteiro pra lista (PtLista).
+// Saída: - Ponteiro pra lista (PtLista).
+palavra* cria_lista (FILE* arquivotxt, palavra* PtLista)//" '!@#$%¨&*()-_=+{[]},.;:\n?/\\\"~^´`"
+{
+    char buffer_linha[TAM_LINHA+1]; // Variável para pegar a linha inteira do arquivo de texto.
+    char *verbeteaux; // String que recebe as palavras e manda pra função.
+
+    while (fgets(buffer_linha, TAM_LINHA+1, arquivotxt)) // Enquanto houverem linhas sendo lidas.
+    {
+        if((verbeteaux = strtok(buffer_linha, " '\"!¹@³$£%¢¨¬&*()_-=+§´`[{ª~^]}º,<.>;:/\\|*?°\n«"))) // Se a função strtok retornar algo diferente de 0.
+        {
+            strlwr(verbeteaux); // Todas as letras da string recebidas se tornam minúsculas.
+            PtLista = insere_palavra(PtLista, verbeteaux); // Insere novo nó na lista.
+        }
+        while ((verbeteaux = strtok(NULL, " '\"!¹@³$£%¢¨¬&*()_-=+§´`[{ª~^]}º,<.>;:/\\|*?°\n«"))) // Enquanto a função strtok retornar algo diferente de 0.
+        {
+            strlwr(verbeteaux); // Todas as letras da string recebidas se tornam minúsculas.
+            PtLista = insere_palavra(PtLista, verbeteaux); // Insere novo nó na lista.
+        }
+    }
+    return PtLista; // Retorna ponteiro para a lista.
+}
+
+// Função que imprime lista com palavras que apareceram entre k1 e k2 vezes.
+// Entrada: - Ponteiro pra lista (PtLista).
+//          - Limite inferior (K1).
+//          - Limite superior (K2).
+// Saída: não há retorno na função.
+//        Um arquivo saída é criado, na pasta do executável, com tudo que foi impresso no prompt.
+void imprime_lista (palavra *PtLista, int K1, int K2)
+{
+    palavra* PtAux; // Ponteiro auxiliar para percorrer a lista.
+    PtAux = PtLista; // Posiciona o PtAux no início da lista.
+    FILE* saida; // Arquivo de saída.
+
+    saida = fopen( "saida.txt", "w+"); // Abre o arquivo.
+    //fprintf(saida, "Sa\641da:\n", PtAux->aparicoes, PtAux->verbete);
+
+    while(PtAux->prox != NULL) // Percorrer a lista até o final.
+    {
+        if(PtAux->aparicoes >= K1 && PtAux->aparicoes <= K2) // Se a palavra tiver aparecido entre K1 e K2 vezes.
+        {
+            printf("%4d - %s\n", PtAux->aparicoes, PtAux->verbete); // Imprime na tela.
+            fprintf(saida, "    %4d - %s\n", PtAux->aparicoes, PtAux->verbete); // Imprime no arquivo de saída.
+        }
+        PtAux = PtAux->prox; // PtAux avança um nó para frente.
+    }
+   fclose(saida); // Fecha o arquivo.
+}
+
+// Função que aloca um novo nó e insere no lugar correto da lista.
+// Entrada: - Ponteiro pra lista (PtLista).
+//          - String que é a palavra (info).
+// Saída: - Ponteiro para lista (PtLista).
+palavra* insere_palavra (palavra *PtLista, char *info)
+{
+    palavra* novo; // Novo nó para ser alocado.
+    palavra* PtAux; // Ponteiro auxiliar para percorrer a lista.
+    palavra* PtAux2; // Ponteiro para ficar ao lado do PtAux enquanto percorrem a lista.
+                     // PtAux2 sempre se situa no nó anterior, exceto quando se trata do primeiro.
+
+    if (PtLista == NULL) // Cria o primeiro nó.
+    {
+        novo = (palavra*)malloc(sizeof(struct PtPalavra)); // Aloca novo nó.
+        // Faz atribuições ao nó.
+        strcpy(novo->verbete, info);
+        novo->aparicoes = 1;
+        novo->ant = NULL;
+        novo->prox = NULL;
+
+        PtLista = novo;
+    }
+    else
+    {
+        PtAux = PtLista; // Posiciona PtAux no início da lista.
+        PtAux2 = PtLista; // Posiciona PtAux2 no início da lista.
+        while(PtAux != NULL) // Percorrer a lista até o final.
+        {
+            if(!(strcmp(PtAux->verbete, info))) // Se as palavras forem iguais.
+            {
+                PtAux->aparicoes += 1; // Incrementa o número de aparições.
+                if (PtAux == PtLista) // Se o nó em questão for o primeiro, a função retorna o ponteiro para a lista.
+                {
+                    return PtLista;
+                }
+                while (PtAux2->aparicoes < PtAux->aparicoes) // Enquanto o número de aparições do nó da esquerda for MAIOR que o da direita.
+                {
+                    PtAux = swap_no(PtAux2, PtAux); // Chama função de troca de posições entre nó esquerdo e nó direito.
+                    if (PtAux->ant != NULL) // Se neste momento nó em questão NÃO FICOU no início da lista.
+                    {
+                        PtAux2 = PtAux->ant; // PtAux2 é posicionado à esquerda do PtAux.
+                    }
+                    else // Se neste momento nó em questão FICOU no início da lista.
+                    {
+                        PtLista = PtAux; // PtLista é reposicionado para o início da lista.
+                        return PtLista; // Retorna ponteiro para lista.
+                    }
+                }
+                while (strcmp(PtAux2->verbete, PtAux->verbete) == 1) // Se a palavra da esquerda é maior (vem depois na ordem alfabética)
+                {
+                    if (PtAux2->aparicoes == PtAux->aparicoes) // Se o número de aparições do nó da esquerda for IGUAL ao da direita.
+                    {
+                        PtAux = swap_no (PtAux2, PtAux); // Chama função de troca de posições entre nó esquerdo e nó direito.
+                        if (PtAux->ant != NULL) // Se neste momento nó em questão NÃO FICOU no início da lista.
+                        {
+                            PtAux2 = PtAux->ant; // PtAux2 é posicionado à esquerda do PtAux.
+                        }
+                        else // Se neste momento nó em questão FICOU no início da lista.
+                        {
+                            PtLista = PtAux; // PtLista é reposicionado para o início da lista.
+                            return PtLista; // Retorna ponteiro para lista.
+                        }
+                    }
+                    else // Se o número de aparições do nó da esquerda for DIFERENTE do da direita.
+                    {
+                        return PtLista; // Retorna ponteiro para lista.
+                    }
+                }
+                return PtLista; // Retorna ponteiro para lista.
+            }
+            PtAux2 = PtAux; // PtAux2 é posicionado onde PtAux está.
+            PtAux = PtAux->prox; // PtAux avança um nó.
+        }
+
+        // Caso não encontre nenhuma palavra na lista que seja igual:
+        novo = (palavra*)malloc(sizeof(struct PtPalavra)); // Aloca novo nó.
+        strcpy(novo->verbete, info);
+        novo->aparicoes = 1;
+
+        // Insere o nó na lista, porém não está ordenando a lista.
+        PtAux2->prox = novo;
+        novo->ant = PtAux2;
+        novo->prox = NULL;
+
+        PtAux = novo; // PtAux passa a apontar para o último nó.
+
+        while (strcmp(PtAux2->verbete, PtAux->verbete) == 1) // Se a palavra da esquerda é maior (vem depois na ordem alfabética)
+        {
+            if (PtAux2->aparicoes == PtAux->aparicoes) // Se o número de aparições do nó da esquerda for IGUAL que o da direita.
+            {
+                PtAux = swap_no (PtAux2, PtAux); // Chama função de troca de posições entre nó esquerdo e nó direito.
+                if (PtAux->ant != NULL) // Se neste momento nó em questão NÃO FICOU no início da lista.
+                {
+                    PtAux2 = PtAux->ant; // PtAux2 é posicionado à esquerda do PtAux.
+                }
+                else // Se neste momento nó em questão FICOU no início da lista.
+                {
+                    PtLista = PtAux; // PtLista é reposicionado para o início da lista.
+                    return PtLista; // Retorna ponteiro para lista.
+                }
+            }
+            else // Se o número de aparições do nó da esquerda for DIFERENTE do da direita.
+            {
+                return PtLista; // Retorna ponteiro para lista.
+            }
+        }
+    }
+    return PtLista; // Retorna ponteiro para lista.
+}
+
+// Inicializa ponteiros para a struct PtPalavra.
+// Entrada: não tem entrada na função.
+// Saída: - NULL.
+palavra* inicializa_ponteiro(void)
+{
+    return NULL;
+}
+
+// Destrói lista.
+// Entrada: - Ponteiro para lista (PtLista).
+// Saída: não tem saída.
+void destroi_lista (palavra *PtLista)
+{
+    palavra* PtAux; // Ponteiro auxiliar para percorrer a lista.
+    PtAux = PtLista; // Posiciona PtAux no início da lista.
+    while(PtAux->prox != NULL) // Percorrer a lista até o final.
+    {
+        PtAux = PtAux->prox; // PtAux vai para o próximo nó.
+        free(PtAux->ant); // Desaloca o nó anterior ao PtAux.
+    }
+    free(PtAux); // Desaloca o último nó.
+}
+
+// Coloca o nó da esquerda na direita e o da direita na esquerda.
+// Entrada: - Ponteiro para nó (esquerda).
+//          - Ponteiro para nó seguinte na lista (direita).
+// Saída: - Ponteiro para o nó que foi passado para a posição anterior na lista (direita).
+palavra* swap_no(palavra *esquerda, palavra *direita)
+{
+    esquerda->prox = direita->prox;
+    if (direita->prox != NULL) // Se o nó seguinte não é o último.
+    {
+        direita->prox->ant = esquerda;
+    }
+    if (esquerda->ant != NULL) // Se o nó anterior não é o primeiro.
+    {
+        esquerda->ant->prox = direita;
+    }
+    direita->ant = esquerda->ant;
+    esquerda->ant = direita;
+    direita->prox = esquerda;
+    return direita;
+}
+
+// Verifica validade dos dados K1 e K2.
+// Entrada: - Limite inferior (K1).
+//          - Limite superior (K2).
+// Saída: - 0, se pelo menos um dos valores de K1 ou K2 não forem válidos.
+//        - 1, se os valores de K1 e K2 forem válidos.
+int verifica_limites (int *K1, int *K2)
+{
+    int aux;
+    if (*K1 < 0 || *K2 < 0) // O programa não pode continuar se os valores de K1 ou K2 forem negativos.
+    {
+        printf("\nOs valores de K1 e K2 n\706o podem ser negativos.\n"); // Aviso ao usuário.
+        return 0;
+    }
+    if (*K1 > *K2) // No caso do limite superior ser menor que o limite inferior, programa avisa o erro, mas faz um swap.
+    {
+        printf("\nK1 precisa ser limite inferior e K2 limite superior.\nInvertemos os valores para voc\210.\n"); // Aviso ao usuário.
+        aux = *K1; // SWAP
+        *K1 = *K2;
+        *K2 = aux;
+    }
+    return 1;
+}
