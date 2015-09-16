@@ -1,0 +1,76 @@
+/*****************************************************************
+ * Trabalho final de Estrutura de Dados:                         *
+ * Gabriel Simonetti Souza - 243661                              *
+ * Vinícius Roratto Carvalho - 160094                            *
+ * Este programa lê arquivos de texto e faz a contagem das       *
+ * palavras que se repetem e mostra na tela todas que aparecerem *
+ * entre K1 e K2 vezes.                                          *
+ *****************************************************************/
+
+//Bibliotecas usadas.
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h> //Esta biblioteca é usada para calcular o tempo de execução dos programas.
+#include "bib_lista.h" //Biblioteca criada para as funções implementadas no trabalho.
+
+int main (int argc, char*argv[])
+{
+
+//Declaração das variáveis.
+    int K1=0; //Limite inferior.
+    int K2=0; //Limite superior.
+    char nomedotxt[TAM_NOME_ARQUIVO]; //Nome do arquivo de texto.
+    long unsigned int tempo_zero; //Tempo inicial na execução do programa.
+    palavra* PtLista; //Ponteiro para o início da lista.
+    FILE* arquivotxt; //Ponteiro para o arquivo de texto que será lido.
+    FILE *saida; //Ponteiro para o arquivo de texto de saida.
+
+//Transformação dos argumentos na main.
+    K1 = atoi(argv[1]); //Converte primeiro argumento em K1.
+    K2 = atoi(argv[2]); //Converte segundo argumento em K2.
+    strcpy(nomedotxt, argv[3]); //Converte terceira substring em string que recebe nome de arquivo.
+
+//Inicialização do contador de tempo.
+    tempo_zero = GetTickCount();
+
+//Inicialização do ponteiro de lista.
+    PtLista = inicializa_ponteiro();
+
+//Testes.
+    if(!(verifica_limites (&K1, &K2))) //Chama função que verifica a validade de K1 e K2.
+    {
+        printf("\nPrograma encerrado.\n");
+        return 0;
+    }
+
+//Abrir arquivo de leitura.
+    if (!(arquivotxt = fopen(nomedotxt, "r")))
+        {
+            puts("\nErro na leitura do arquivo.\n");
+            return 0;
+        }
+    else
+        puts("\nArquivo aberto com sucesso.\nAguarde \n\n");
+
+//Manipulaçao dos dados do arquivo. A função cria_lista é chamada que é onde o arquivo é lido e a lista de palavras criada e ordenada.
+    PtLista = cria_lista (arquivotxt, PtLista);
+
+//Impressão da lista de palavras na do primeiro para o último.
+    imprime_lista (PtLista, K1, K2);
+
+//Desalocar lista.
+    destroi_lista(PtLista);
+
+//Fechar arquivo de texto.
+    fclose(arquivotxt);
+
+//Imprime tempo de execução na tela e no arquivo.
+    saida = fopen("saida.txt", "a+");
+    printf("\nTempo de execu\207\706o: %lu milissegundos.\n\n", GetTickCount() - tempo_zero); //Tempo atual - tempo inicial.
+    fprintf(saida, "\nTempo de execução: %lu milissegundos.\n\n", GetTickCount() - tempo_zero); //Tempo atual - tempo inicial. NO ARQUIVO.
+    fclose(saida);
+
+//Fim do programa.
+    return 0;
+}
