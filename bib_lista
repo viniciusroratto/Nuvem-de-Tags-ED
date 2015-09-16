@@ -1,0 +1,58 @@
+
+#define TAM_PALAVRA 50 // Tamanho máximo para cada palavra.
+#define TAM_LINHA 255 // Tamanho máximo para linha lida no arquivo de texto.
+#define TAM_NOME_ARQUIVO 40 // Tamanho máximo para o nome do arquivo.
+
+typedef struct PtPalavra palavra;
+
+struct PtPalavra
+{
+	char verbete[TAM_PALAVRA+1]; // A palavra.
+	int aparicoes; // Quantas vezes a palavra apareceu.
+	palavra* prox; // Ponteiro para próximo nó.
+	palavra* ant; // Ponteiro para nó anterior.
+};
+
+//Funções.
+
+// Função que lê linhas do arquivo e armazena na LDE.
+// Entrada: - Ponteiro pra arquivo (arquivotxt).
+//          - Ponteiro pra lista (PtLista).
+// Saída: - Ponteiro pra lista (PtLista).
+palavra* cria_lista (FILE* arquivotxt, palavra* PtLista);
+
+// Função que imprime lista com palavras que apareceram entre k1 e k2 vezes.
+// Entrada: - Ponteiro pra lista (PtLista).
+//          - Limite inferior (K1).
+//          - Limite superior (K2).
+// Saída: não há retorno na função.
+void imprime_lista (palavra *PtLista, int K1, int K2);
+
+// Função que aloca um novo nó e insere no lugar correto da lista.
+// Entrada: - Ponteiro pra lista (PtLista).
+//          - String que é a palavra (info).
+// Saída: - Ponteiro para lista (PtLista).
+palavra* insere_palavra (palavra *PtLista, char *info);
+
+// Inicializa ponteiros para a struct PtPalavra.
+// Entrada: não tem entrada na função.
+// Saída: - NULL.
+palavra* inicializa_ponteiro (void);
+
+// Destrói lista.
+// Entrada: - Ponteiro para lista (PtLista).
+// Saída: não tem saída.
+void destroi_lista (palavra *PtLista);
+
+// Coloca o nó da esquerda na direita e o da direita na esquerda.
+// Entrada: - Ponteiro para nó (esquerda).
+//          - Ponteiro para nó seguinte na lista (direita).
+// Saída: - Ponteiro para o nó que foi passado para a posição anterior na lista (direita).
+palavra* swap_no(palavra *esquerda, palavra *direita);
+
+// Verifica validade dos dados K1 e K2.
+// Entrada: - Endereço do limite inferior (K1).
+//          - Endereço do limite superior (K2).
+// Saída: - 0, se pelo menos um dos valores de K1 ou K2 não forem válidos.
+//        - 1, se os valores de K1 e K2 forem válidos.
+int verifica_limites (int *K1, int *K2);
